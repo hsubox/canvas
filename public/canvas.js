@@ -5,15 +5,44 @@ var clickX = new Array();
 var clickY = new Array();
 var clickDrag = new Array();
 var paint;
+var outlineLayerData;
+var colorLayerData;
 
-var colorRed = "red";
-var colorOrange = "orange";
-var colorYellow = "yellow";
-var colorGreen = "green";
-var colorBlue = "blue";
-var colorPurple = "purple";
-var colorBlack = "black";
-var colorWhite = "white";
+var colorRed = {
+  r: 255,
+  g: 0,
+  b: 0
+};
+var colorOrange = {
+  r: 255,
+  g: 165,
+  b: 0
+};
+var colorYellow =  {
+  r: 255,
+  g: 255,
+  b: 0
+};
+var colorGreen = {
+  r: 0,
+  g: 255,
+  b: 0
+};
+var colorBlue = {
+  r: 0,
+  g: 0,
+  b: 255
+};
+var colorPurple = {
+  r: 128,
+  g: 0,
+  b: 128
+};
+var colorWhite = {
+  r: 255,
+  g: 255,
+  b: 255
+};
 var clickColor = new Array();
 var curColor = colorPurple;
 
@@ -37,29 +66,43 @@ outlineImage.onload = function() {
   canvas.setAttribute('width', this.width);
   canvas.setAttribute('height', this.height);
   context.drawImage(this, 0, 0);
+  try {
+    outlineLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
+	} catch (ex) {
+    console.error(ex);
+  }
 };
 
 $('#canvas').mousedown(function(e) {
   var mouseX = e.pageX - this.offsetLeft;
   var mouseY = e.pageY - this.offsetTop;
-  paint = true;
-  addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, false);
-  redraw();
+  if (curTool == "bucket") {
+    colorLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
+    paintAt(mouseX, mouseY);
+  } else {
+    paint = true;
+    addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, false);
+    redraw();
+  }
 });
 $('#canvas').mousemove(function(e) {
   var mouseX = e.pageX - this.offsetLeft;
   var mouseY = e.pageY - this.offsetTop;
-  if (paint) {
+  if (curTool != "bucket" && paint) {
     addClick(mouseX, mouseY, true);
     redraw();
   }
 });
 $('#canvas').mouseup(function(e) {
-  paint = false;
+  if (curTool != "bucket") {
+    paint = false;
+  }
   redraw();
 });
 $('#canvas').mouseleave(function(e) {
-  paint = false;
+  if (curTool != "bucket") {
+    paint = false;
+  }
 });
 
 $('#chooseRed').mousedown(function(e) {
@@ -79,9 +122,6 @@ $('#chooseBlue').mousedown(function(e) {
 });
 $('#choosePurple').mousedown(function(e) {
   curColor = colorPurple;
-});
-$('#chooseBlack').mousedown(function(e) {
-  curColor = colorBlack;
 });
 
 $('#chooseSmall').mousedown(function(e) {
@@ -103,6 +143,10 @@ $('#chooseMarker').mousedown(function(e) {
 });
 $('#chooseEraser').mousedown(function(e) {
 	curTool = "eraser";
+});
+$('#chooseFill').mousedown(function(e) {
+	curTool = "bucket";
+  colorLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
 });
 $('#clearCanvas').mousedown(function(e) {
 	clickX = new Array();
@@ -133,6 +177,8 @@ function clearCanvas() {
 
 function redraw() {
   clearCanvas();
+
+  context.lineCap = "round";
   context.lineJoin = "round";
 
   for (var i = 0; i < clickX.length; i++) {
@@ -158,11 +204,133 @@ function redraw() {
     }
     context.lineTo(clickX[i], clickY[i]);
     context.closePath();
-    context.strokeStyle = clickColor[i];
+    context.strokeStyle = "rgb(" + clickColor[i].r + ", " + clickColor[i].g + ", " + clickColor[i].b + ")";
     context.lineWidth = radius;
     context.stroke();
     // context.globalAlpha = 1;
   }
 
   context.drawImage(outlineImage, 0, 0);
+  context.putImageData(colorLayerData, 0, 0);
+}
+
+function matchOutlineColor(r, g, b, a) {
+  return (r + g + b < 100 && a === 255);
+}
+
+function matchStartColor (pixelPos, startR, startG, startB) {
+
+  var r = outlineLayerData.data[pixelPos];
+  var g = outlineLayerData.data[pixelPos + 1];
+	var b = outlineLayerData.data[pixelPos + 2];
+	var a = outlineLayerData.data[pixelPos + 3];
+
+	// If current pixel of the outline image is black
+	if (matchOutlineColor(r, g, b, a)) {
+	   return false;
+	}
+
+	r = colorLayerData.data[pixelPos];
+	g = colorLayerData.data[pixelPos + 1];
+	b = colorLayerData.data[pixelPos + 2];
+
+	// If the current pixel matches the clicked color
+	if (r === startR && g === startG && b === startB) {
+		return true;
+	}
+
+	// If current pixel matches the new color
+	if (r === curColor.r && g === curColor.g && b === curColor.b) {
+		return false;
+	}
+
+	// Return the difference in current color and start color within a tolerance
+	return (Math.abs(r - startR) + Math.abs(g - startG) + Math.abs(b - startB) < 255);
+}
+
+function colorPixel (pixelPos, r, g, b, a) {
+	colorLayerData.data[pixelPos] = r;
+	colorLayerData.data[pixelPos + 1] = g;
+	colorLayerData.data[pixelPos + 2] = b;
+	colorLayerData.data[pixelPos + 3] = a !== undefined ? a : 255;
+}
+
+function floodFill (startX, startY, startR, startG, startB) {
+  var newPos;
+  var x;
+  var y;
+  var pixelPos;
+  var reachLeft;
+  var reachRight;
+  var drawingBoundLeft = 0;
+  var drawingBoundTop = 0;
+  var drawingBoundRight = canvas.width - 1;
+  var drawingBoundBottom = canvas.height - 1;
+  var pixelStack = [[startX, startY]];
+
+	while (pixelStack.length > 0) {
+    newPos = pixelStack.pop();
+		x = newPos[0];
+		y = newPos[1];
+		// Get current pixel position
+		pixelPos = (y * canvas.width + x) * 4;
+		// Go up as long as the color matches and are inside the canvas
+		while (y >= drawingBoundTop && matchStartColor(pixelPos, startR, startG, startB)) {
+			y -= 1;
+			pixelPos -= canvas.width * 4;
+		}
+		pixelPos += canvas.width * 4;
+		y += 1;
+		reachLeft = false;
+		reachRight = false;
+		// Go down as long as the color matches and in inside the canvas
+		while (y <= drawingBoundBottom && matchStartColor(pixelPos, startR, startG, startB)) {
+			y += 1;
+			colorPixel(pixelPos, curColor.r, curColor.g, curColor.b);
+			if (x > drawingBoundLeft) {
+				if (matchStartColor(pixelPos - 4, startR, startG, startB)) {
+					if (!reachLeft) {
+						// Add pixel to stack
+						pixelStack.push([x - 1, y]);
+						reachLeft = true;
+					}
+				} else if (reachLeft) {
+					reachLeft = false;
+				}
+			}
+			if (x < drawingBoundRight) {
+				if (matchStartColor(pixelPos + 4, startR, startG, startB)) {
+					if (!reachRight) {
+						// Add pixel to stack
+						pixelStack.push([x + 1, y]);
+						reachRight = true;
+					}
+				} else if (reachRight) {
+					reachRight = false;
+				}
+			}
+			pixelPos += canvas.width * 4;
+		}
+	}
+}
+
+// Start painting with paint bucket tool starting from pixel specified by startX and startY
+function paintAt (startX, startY) {
+	var pixelPos = (startY * canvas.width + startX) * 4;
+  var r = colorLayerData.data[pixelPos];
+	var g = colorLayerData.data[pixelPos + 1];
+	var b = colorLayerData.data[pixelPos + 2];
+	var a = colorLayerData.data[pixelPos + 3];
+
+  // Return because trying to fill with the same color
+	if (r === curColor.r && g === curColor.g && b === curColor.b) {
+		return;
+	}
+  // Return because clicked outline
+	if (matchOutlineColor(r, g, b, a)) {
+		return;
+	}
+
+	floodFill(startX, startY, r, g, b);
+	redraw();
 }
