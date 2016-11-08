@@ -8,41 +8,13 @@ var paint;
 var outlineLayerData;
 var colorLayerData;
 
-var colorRed = {
-  r: 255,
-  g: 0,
-  b: 0
-};
-var colorOrange = {
-  r: 255,
-  g: 165,
-  b: 0
-};
-var colorYellow =  {
-  r: 255,
-  g: 255,
-  b: 0
-};
-var colorGreen = {
-  r: 0,
-  g: 255,
-  b: 0
-};
-var colorBlue = {
-  r: 0,
-  g: 0,
-  b: 255
-};
-var colorPurple = {
-  r: 128,
-  g: 0,
-  b: 128
-};
-var colorWhite = {
-  r: 255,
-  g: 255,
-  b: 255
-};
+var colorRed = { r: 255, g: 0, b: 0 };
+var colorOrange = { r: 255, g: 165, b: 0 };
+var colorYellow =  { r: 255, g: 255, b: 0 };
+var colorGreen = { r: 0, g: 255, b: 0 };
+var colorBlue = { r: 0, g: 0, b: 255 };
+var colorPurple = { r: 128, g: 0, b: 128 };
+var colorWhite = { r: 255, g: 255, b: 255 };
 var clickColor = new Array();
 var curColor = colorPurple;
 
@@ -146,7 +118,6 @@ $('#chooseEraser').mousedown(function(e) {
 });
 $('#chooseFill').mousedown(function(e) {
 	curTool = "bucket";
-  colorLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
 });
 $('#clearCanvas').mousedown(function(e) {
 	clickX = new Array();
@@ -154,7 +125,9 @@ $('#clearCanvas').mousedown(function(e) {
 	clickDrag = new Array();
 	clickColor = new Array();
 	clickSize = new Array();
+  colorLayerData = outlineLayerData;
 	redraw();
+  colorLayerData = null;
 });
 
 function addClick(x, y, dragging) {
@@ -182,6 +155,10 @@ function redraw() {
   context.lineJoin = "round";
 
   for (var i = 0; i < clickX.length; i++) {
+    if (colorLayerData) {
+      context.putImageData(colorLayerData, 0, 0);
+    }
+
     switch (clickSize[i]) {
       case "small":
         radius = 2;
@@ -211,7 +188,7 @@ function redraw() {
   }
 
   context.drawImage(outlineImage, 0, 0);
-  context.putImageData(colorLayerData, 0, 0);
+  colorLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
 }
 
 function matchOutlineColor(r, g, b, a) {
