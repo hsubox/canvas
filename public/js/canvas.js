@@ -1,4 +1,10 @@
 var socket = io();
+var url = window.location.pathname;
+socket.on('connect', function() {
+   socket.emit('room', url);
+});
+
+var outlineImageSrc = 'img/' + url + '.png';
 
 // if no outlineImage, canvas will take this size
 var default_width = 500;
@@ -39,7 +45,7 @@ canvasDiv.appendChild(canvas);
 context = canvas.getContext("2d");
 
 var outlineImage = new Image();
-outlineImage.src = "img/pattern1.png";
+outlineImage.src = outlineImageSrc;
 outlineImage.onload = function() {
   canvas.setAttribute('width', this.width);
   canvas.setAttribute('height', this.height);

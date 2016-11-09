@@ -6,23 +6,29 @@ var io = require('socket.io')(http);
 app.use('/js', express.static('public/js'));
 app.use('/css', express.static('public/css'));
 app.use('/img', express.static('public/img'));
-app.get('/', function(req, res) {
+app.get('/:pattern', function(req, res) {
   res.sendFile(__dirname + '/public/canvas.html');
 });
 
 var imageRequestedBy = false;
+
 io.on('connection', function(socket) {
+  var sockets_room = null;
+  socket.on('room', function(room) {
+      socket.join(room);
+      sockets_room = room;
+  });
   socket.on('draw', function(drawData) {
-    socket.broadcast.emit('draw', drawData);
+    socket.broadcast.in(sockets_room).emit('draw', drawData);
   });
   socket.on('fill', function(fillData) {
-    socket.broadcast.emit('fill', fillData);
+    socket.broadcast.in(sockets_room).emit('fill', fillData);
   });
   socket.on('clear', function() {
-    socket.broadcast.emit('clear');
+    socket.broadcast.in(sockets_room).emit('clear');
   });
   socket.on('imageRequest', function() {
-    socket.broadcast.emit('imageRequest');
+    socket.broadcast.in(sockets_room).emit('imageRequest');
     imageRequestedBy = socket.id;
   });
   socket.on('image', function(imageData) {
