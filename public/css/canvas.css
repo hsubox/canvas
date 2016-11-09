@@ -1,18 +1,26 @@
-canvas {
-  position: absolute;
+#canvasDiv {
+  display: flex;
+  justify-content: center;
+}
+
+#toolboxDiv {
+  display: flex;
+  justify-content: center;
 }
 
 .toolbox {
   display: flex;
-  justify-content: space-between;
-  max-width: 800px;
+  justify-content: space-around;
+  width: 850px;
 }
 
 .colors, .size, .tools {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: 400px;
+  width: 250px;
+  padding-left: 25px;
+  padding-right: 25px;
 }
 
 .colors a, .size a, .tools a {
