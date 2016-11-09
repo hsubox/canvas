@@ -46,6 +46,7 @@ outlineImage.onload = function() {
 	} catch (ex) {
     console.error(ex);
   }
+  socketEmitImageRequest();
 };
 
 // socket updates
@@ -63,26 +64,65 @@ socket.on('fill', function(fillData) {
   redraw();
 });
 socket.on('clear', function() {
-  clear();
+  clearCanvas();
 });
+socket.on('image', function(imageData) {
+  var initialImage = new Image();
+  initialImage.src = imageData.dataURL;
+  initialImage.onload = function() {
+    canvas.setAttribute('width', this.width);
+    canvas.setAttribute('height', this.height);
+    context.drawImage(this, 0, 0);
+    try {
+      colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
+  	} catch (ex) {
+      console.error(ex);
+    }
+  };
+  redraw();
+});
+socket.on('imageRequest', function() {
+  socketEmitImage();
+});
+function socketEmitDraw() {
+  socket.emit('draw', {
+    clickX: clickX,
+    clickY: clickY,
+    clickDrag: clickDrag,
+    clickColor: clickColor,
+    clickSize: clickSize,
+    clickTool: clickTool
+  });
+}
+function socketEmitFill() {
+  socket.emit('fill', {
+    mouseX: mouseX,
+    mouseY: mouseY,
+    color: curColor
+  });
+}
+function socketEmitClear() {
+  socket.emit('clear');
+}
+function socketEmitImage() {
+  var dataURL = canvas.toDataURL();
+  socket.emit('image', {
+    dataURL: dataURL
+  });
+}
+function socketEmitImageRequest() {
+  socket.emit('imageRequest');
+}
 
 // mouse events
 $('#canvas').mousedown(function(e) {
   var mouseX = e.pageX - this.offsetLeft;
   var mouseY = e.pageY - this.offsetTop;
   if (curTool == "bucket") {
-    colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
     paintAt(mouseX, mouseY, curColor);
-    socket.emit('fill', {
-      mouseX: mouseX,
-      mouseY: mouseY,
-      color: curColor
-    });
+    socketEmitFill();
   } else {
     paint = true;
-
-    var mouseX = e.pageX - this.offsetLeft;
-    var mouseY = e.pageY - this.offsetTop;
     addClick(mouseX, mouseY, false);
     redraw();
   }
@@ -93,42 +133,21 @@ $('#canvas').mousemove(function(e) {
   if (curTool != "bucket" && paint) {
     addClick(mouseX, mouseY, true);
     redraw();
-    socket.emit('draw', {
-      clickX: clickX,
-      clickY: clickY,
-      clickDrag: clickDrag,
-      clickColor: clickColor,
-      clickSize: clickSize,
-      clickTool: clickTool
-    });
+    socketEmitDraw();
   }
 });
 $('#canvas').mouseup(function(e) {
   if (curTool != "bucket") {
     paint = false;
     redraw();
-    socket.emit('draw', {
-      clickX: clickX,
-      clickY: clickY,
-      clickDrag: clickDrag,
-      clickColor: clickColor,
-      clickSize: clickSize,
-      clickTool: clickTool
-    });
+    socketEmitDraw();
     resetStrokes();
   }
 });
 $('#canvas').mouseleave(function(e) {
   if (curTool != "bucket") {
     paint = false;
-    socket.emit('draw', {
-      clickX: clickX,
-      clickY: clickY,
-      clickDrag: clickDrag,
-      clickColor: clickColor,
-      clickSize: clickSize,
-      clickTool: clickTool
-    });
+    socketEmitDraw();
     resetStrokes();
   }
 });
@@ -176,11 +195,11 @@ $('#chooseFill').mousedown(function(e) {
 	curTool = "bucket";
 });
 $('#clearCanvas').mousedown(function(e) {
-	clear();
-  socket.emit('clear');
+	clearCanvas();
+  socketEmitClear();
 });
 
-function clear() {
+function clearCanvas() {
   resetStrokes();
   colorFillData = null;
 	redraw();
@@ -207,13 +226,8 @@ function addClick(x, y, dragging) {
   clickDrag.push(dragging);
 }
 
-function clearCanvas() {
-  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-}
-
 function redraw() {
-  clearCanvas();
-
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
   context.lineCap = "round";
   context.lineJoin = "round";
 
