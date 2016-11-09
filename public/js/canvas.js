@@ -198,6 +198,10 @@ $('#clearCanvas').mousedown(function(e) {
 	clearCanvas();
   socketEmitClear();
 });
+$('#saveImage').mousedown(function(e) {
+  var dataURL = canvas.toDataURL('image/png');
+  this.href = dataURL;
+});
 
 function clearCanvas() {
   resetStrokes();
@@ -267,7 +271,6 @@ function redraw() {
   context.drawImage(outlineImage, 0, 0);
   colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
 }
-
 
 // For bucket fill
 function matchOutlineColor(r, g, b, a) {
