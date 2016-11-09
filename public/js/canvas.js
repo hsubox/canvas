@@ -47,9 +47,11 @@ canvas.setAttribute('id', 'canvas');
 canvasDiv.appendChild(canvas);
 context = canvas.getContext("2d");
 
-var outlineImage = new Image();
-outlineImage.src = outlineImageSrc;
-outlineImage.onload = function() {
+// outlineImageTransparent takes outlineImageOriginal and makes the white areas transparent
+var outlineImageOriginal = new Image();
+outlineImageOriginal.src = outlineImageSrc;
+var outlineImageTransparent = new Image();
+outlineImageOriginal.onload = function() {
   // resizes image if very large
   var normalizedWidth = this.width;
   var normalizedHeight = this.height;
@@ -66,11 +68,31 @@ outlineImage.onload = function() {
   context.drawImage(this, 0, 0, normalizedWidth, normalizedHeight);
   try {
     outlineLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
+    makeTransparent();
 	} catch (ex) {
     console.error(ex);
   }
   socketEmitImageRequest();
 };
+
+function makeTransparent() {
+  for (var pixel = 0; pixel < outlineLayerData.data.length; pixel += 4) {
+    var r = outlineLayerData.data[pixel];
+    var g = outlineLayerData.data[pixel + 1];
+    var b = outlineLayerData.data[pixel + 2];
+    var a = outlineLayerData.data[pixel + 3];
+    if (r + g + b > 600) {
+      outlineLayerData.data[pixel] = 255;
+      outlineLayerData.data[pixel + 1] = 255;
+      outlineLayerData.data[pixel + 2] = 255;
+      outlineLayerData.data[pixel + 3] = 0;
+    }
+  }
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+  context.putImageData(outlineLayerData, 0, 0);
+  outlineImageTransparent.src = canvas.toDataURL();
+  context.drawImage(outlineImageTransparent, 0, 0, canvas.width, canvas.height);
+}
 
 // socket updates
 socket.on('draw', function(drawData){
@@ -328,10 +350,8 @@ function redraw() {
     context.strokeStyle = "rgb(" + clickColor[i].r + ", " + clickColor[i].g + ", " + clickColor[i].b + ")";
     context.lineWidth = radius;
     context.stroke();
-    // context.globalAlpha = 1;
   }
-
-  context.drawImage(outlineImage, 0, 0, canvas.width, canvas.height);
+  context.drawImage(outlineImageTransparent, 0, 0, canvas.width, canvas.height);
   colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
 }
 
