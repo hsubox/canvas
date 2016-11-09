@@ -337,7 +337,7 @@ function redraw() {
 
 // For bucket fill
 function matchOutlineColor(r, g, b, a) {
-  return (r + g + b < 100 && a === 255);
+  return (r + g + b < 100 && a > 50);
 }
 
 function matchStartColor (pixelPos, startR, startG, startB, color) {
@@ -439,7 +439,7 @@ function floodFill (startX, startY, startR, startG, startB, color) {
 // Start painting with paint bucket tool starting from pixel specified by startX and startY
 function paintAt (startX, startY, color) {
   colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
-  
+
 	var pixelPos = (startY * canvas.width + startX) * 4;
   var r = colorFillData.data[pixelPos];
 	var g = colorFillData.data[pixelPos + 1];
