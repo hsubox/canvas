@@ -5,6 +5,7 @@ canvas {
 .toolbox {
   display: flex;
   justify-content: space-between;
+  max-width: 800px;
 }
 
 .colors, .size, .tools {

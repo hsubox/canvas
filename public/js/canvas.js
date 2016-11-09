@@ -7,8 +7,11 @@ socket.on('connect', function() {
 var outlineImageSrc = 'img/' + url + '.png';
 
 // if no outlineImage, canvas will take this size
-var default_width = 500;
-var default_height = 300;
+var defaultWidth = 500;
+var defaultHeight = 300;
+// outlineImage will be scaled down if larger than these dimensions
+var maxWidth = 800;
+var maxHeight = 500;
 
 var clickX = new Array();
 var clickY = new Array();
@@ -38,8 +41,8 @@ $('#chooseMarker').addClass("selected");
 
 var canvasDiv = document.getElementById('canvasDiv');
 var canvas = document.createElement('canvas');
-canvas.setAttribute('width', default_width);
-canvas.setAttribute('height', default_height);
+canvas.setAttribute('width', defaultWidth);
+canvas.setAttribute('height', defaultHeight);
 canvas.setAttribute('id', 'canvas');
 canvasDiv.appendChild(canvas);
 context = canvas.getContext("2d");
@@ -47,9 +50,20 @@ context = canvas.getContext("2d");
 var outlineImage = new Image();
 outlineImage.src = outlineImageSrc;
 outlineImage.onload = function() {
-  canvas.setAttribute('width', this.width);
-  canvas.setAttribute('height', this.height);
-  context.drawImage(this, 0, 0);
+  // resizes image if very large
+  var normalizedWidth = this.width;
+  var normalizedHeight = this.height;
+  if (normalizedWidth > maxWidth) {
+    normalizedHeight = parseInt((maxWidth / normalizedWidth) * normalizedHeight);
+    normalizedWidth = maxWidth;
+  }
+  if (normalizedHeight > maxHeight) {
+    normalizedWidth = parseInt((maxHeight / normalizedHeight) * normalizedWidth);
+    normalizedHeight = maxHeight;
+  }
+  canvas.setAttribute('width', normalizedWidth);
+  canvas.setAttribute('height', normalizedHeight);
+  context.drawImage(this, 0, 0, normalizedWidth, normalizedHeight);
   try {
     outlineLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
 	} catch (ex) {
@@ -103,7 +117,7 @@ function socketEmitDraw() {
     clickTool: clickTool
   });
 }
-function socketEmitFill() {
+function socketEmitFill(mouseX, mouseY) {
   socket.emit('fill', {
     mouseX: mouseX,
     mouseY: mouseY,
@@ -129,7 +143,7 @@ $('#canvas').mousedown(function(e) {
   var mouseY = e.pageY - this.offsetTop;
   if (curTool == "bucket") {
     paintAt(mouseX, mouseY, curColor);
-    socketEmitFill();
+    socketEmitFill(mouseX, mouseY);
   } else {
     paint = true;
     addClick(mouseX, mouseY, false);
@@ -317,7 +331,7 @@ function redraw() {
     // context.globalAlpha = 1;
   }
 
-  context.drawImage(outlineImage, 0, 0);
+  context.drawImage(outlineImage, 0, 0, canvas.width, canvas.height);
   colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
 }
 
@@ -424,6 +438,8 @@ function floodFill (startX, startY, startR, startG, startB, color) {
 
 // Start painting with paint bucket tool starting from pixel specified by startX and startY
 function paintAt (startX, startY, color) {
+  colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
+  
 	var pixelPos = (startY * canvas.width + startX) * 4;
   var r = colorFillData.data[pixelPos];
 	var g = colorFillData.data[pixelPos + 1];
