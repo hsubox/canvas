@@ -1,3 +1,6 @@
+var socket = io();
+
+// if no outlineImage, canvas will take this size
 var default_width = 500;
 var default_height = 300;
 
@@ -33,7 +36,7 @@ canvasDiv.appendChild(canvas);
 context = canvas.getContext("2d");
 
 var outlineImage = new Image();
-outlineImage.src = "pattern1.png";
+outlineImage.src = "img/pattern1.png";
 outlineImage.onload = function() {
   canvas.setAttribute('width', this.width);
   canvas.setAttribute('height', this.height);
@@ -45,15 +48,42 @@ outlineImage.onload = function() {
   }
 };
 
+// socket updates
+socket.on('draw', function(drawData){
+  clickX = drawData.clickX;
+  clickY = drawData.clickY;
+  clickDrag = drawData.clickDrag;
+  clickColor = drawData.clickColor;
+  clickSize = drawData.clickSize;
+  clickTool = drawData.clickTool;
+  redraw();
+});
+socket.on('fill', function(fillData) {
+  paintAt(fillData.mouseX, fillData.mouseY, fillData.color);
+  redraw();
+});
+socket.on('clear', function() {
+  clear();
+});
+
+// mouse events
 $('#canvas').mousedown(function(e) {
   var mouseX = e.pageX - this.offsetLeft;
   var mouseY = e.pageY - this.offsetTop;
   if (curTool == "bucket") {
     colorLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
-    paintAt(mouseX, mouseY);
+    paintAt(mouseX, mouseY, curColor);
+    socket.emit('fill', {
+      mouseX: mouseX,
+      mouseY: mouseY,
+      color: curColor
+    });
   } else {
     paint = true;
-    addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, false);
+
+    var mouseX = e.pageX - this.offsetLeft;
+    var mouseY = e.pageY - this.offsetTop;
+    addClick(mouseX, mouseY, false);
     redraw();
   }
 });
@@ -70,11 +100,27 @@ $('#canvas').mouseup(function(e) {
     paint = false;
   }
   redraw();
+  socket.emit('draw', {
+    clickX: clickX,
+    clickY: clickY,
+    clickDrag: clickDrag,
+    clickColor: clickColor,
+    clickSize: clickSize,
+    clickTool: clickTool
+  });
 });
 $('#canvas').mouseleave(function(e) {
   if (curTool != "bucket") {
     paint = false;
   }
+  socket.emit('draw', {
+    clickX: clickX,
+    clickY: clickY,
+    clickDrag: clickDrag,
+    clickColor: clickColor,
+    clickSize: clickSize,
+    clickTool: clickTool
+  });
 });
 
 $('#chooseRed').mousedown(function(e) {
@@ -120,15 +166,20 @@ $('#chooseFill').mousedown(function(e) {
 	curTool = "bucket";
 });
 $('#clearCanvas').mousedown(function(e) {
-	clickX = new Array();
+	clear();
+  socket.emit('clear')
+});
+
+function clear() {
+  clickX = new Array();
 	clickY = new Array();
 	clickDrag = new Array();
 	clickColor = new Array();
 	clickSize = new Array();
-  colorLayerData = outlineLayerData;
-	redraw();
   colorLayerData = null;
-});
+	redraw();
+  // colorLayerData = null;
+}
 
 function addClick(x, y, dragging) {
   clickX.push(x);
@@ -154,11 +205,11 @@ function redraw() {
   context.lineCap = "round";
   context.lineJoin = "round";
 
-  for (var i = 0; i < clickX.length; i++) {
-    if (colorLayerData) {
-      context.putImageData(colorLayerData, 0, 0);
-    }
+  if (colorLayerData) {
+    context.putImageData(colorLayerData, 0, 0);
+  }
 
+  for (var i = 0; i < clickX.length; i++) {
     switch (clickSize[i]) {
       case "small":
         radius = 2;
@@ -195,7 +246,7 @@ function matchOutlineColor(r, g, b, a) {
   return (r + g + b < 100 && a === 255);
 }
 
-function matchStartColor (pixelPos, startR, startG, startB) {
+function matchStartColor (pixelPos, startR, startG, startB, color) {
 
   var r = outlineLayerData.data[pixelPos];
   var g = outlineLayerData.data[pixelPos + 1];
@@ -217,7 +268,7 @@ function matchStartColor (pixelPos, startR, startG, startB) {
 	}
 
 	// If current pixel matches the new color
-	if (r === curColor.r && g === curColor.g && b === curColor.b) {
+	if (r === color.r && g === color.g && b === color.b) {
 		return false;
 	}
 
@@ -232,7 +283,7 @@ function colorPixel (pixelPos, r, g, b, a) {
 	colorLayerData.data[pixelPos + 3] = a !== undefined ? a : 255;
 }
 
-function floodFill (startX, startY, startR, startG, startB) {
+function floodFill (startX, startY, startR, startG, startB, color) {
   var newPos;
   var x;
   var y;
@@ -252,7 +303,7 @@ function floodFill (startX, startY, startR, startG, startB) {
 		// Get current pixel position
 		pixelPos = (y * canvas.width + x) * 4;
 		// Go up as long as the color matches and are inside the canvas
-		while (y >= drawingBoundTop && matchStartColor(pixelPos, startR, startG, startB)) {
+		while (y >= drawingBoundTop && matchStartColor(pixelPos, startR, startG, startB, color)) {
 			y -= 1;
 			pixelPos -= canvas.width * 4;
 		}
@@ -261,11 +312,11 @@ function floodFill (startX, startY, startR, startG, startB) {
 		reachLeft = false;
 		reachRight = false;
 		// Go down as long as the color matches and in inside the canvas
-		while (y <= drawingBoundBottom && matchStartColor(pixelPos, startR, startG, startB)) {
+		while (y <= drawingBoundBottom && matchStartColor(pixelPos, startR, startG, startB, color)) {
 			y += 1;
-			colorPixel(pixelPos, curColor.r, curColor.g, curColor.b);
+			colorPixel(pixelPos, color.r, color.g, color.b);
 			if (x > drawingBoundLeft) {
-				if (matchStartColor(pixelPos - 4, startR, startG, startB)) {
+				if (matchStartColor(pixelPos - 4, startR, startG, startB, color)) {
 					if (!reachLeft) {
 						// Add pixel to stack
 						pixelStack.push([x - 1, y]);
@@ -276,7 +327,7 @@ function floodFill (startX, startY, startR, startG, startB) {
 				}
 			}
 			if (x < drawingBoundRight) {
-				if (matchStartColor(pixelPos + 4, startR, startG, startB)) {
+				if (matchStartColor(pixelPos + 4, startR, startG, startB, color)) {
 					if (!reachRight) {
 						// Add pixel to stack
 						pixelStack.push([x + 1, y]);
@@ -292,7 +343,7 @@ function floodFill (startX, startY, startR, startG, startB) {
 }
 
 // Start painting with paint bucket tool starting from pixel specified by startX and startY
-function paintAt (startX, startY) {
+function paintAt (startX, startY, color) {
 	var pixelPos = (startY * canvas.width + startX) * 4;
   var r = colorLayerData.data[pixelPos];
 	var g = colorLayerData.data[pixelPos + 1];
@@ -300,7 +351,7 @@ function paintAt (startX, startY) {
 	var a = colorLayerData.data[pixelPos + 3];
 
   // Return because trying to fill with the same color
-	if (r === curColor.r && g === curColor.g && b === curColor.b) {
+	if (r === color.r && g === color.g && b === color.b) {
 		return;
 	}
   // Return because clicked outline
@@ -308,6 +359,6 @@ function paintAt (startX, startY) {
 		return;
 	}
 
-	floodFill(startX, startY, r, g, b);
+	floodFill(startX, startY, r, g, b, color);
 	redraw();
 }
