@@ -69,10 +69,10 @@ outlineImageOriginal.onload = function() {
   try {
     outlineLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
     makeTransparent();
+    socketEmitImageRequest();
 	} catch (ex) {
     console.error(ex);
   }
-  socketEmitImageRequest();
 };
 
 function makeTransparent() {

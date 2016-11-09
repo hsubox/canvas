@@ -1,3 +1,4 @@
+var fs = require('fs');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
@@ -8,6 +9,15 @@ app.use('/css', express.static('public/css'));
 app.use('/img', express.static('public/img'));
 app.get('/:pattern', function(req, res) {
   res.sendFile(__dirname + '/public/canvas.html');
+});
+app.get('/', function(req, res) {
+  var min = 1;
+  var max = 1;
+  fs.readdir('public/img', function(err, files) {
+      max = files.length;
+      var patternNumber = Math.floor(Math.random() * (max - min)) + min;
+      res.redirect('/pattern' + patternNumber);
+  });
 });
 
 var imageRequestedBy = false;
