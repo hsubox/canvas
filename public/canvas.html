@@ -5,33 +5,40 @@
       HTML5 Drawing App
     </title>
     <link rel="stylesheet" type="text/css" href="css/canvas.css">
+    <link rel="stylesheet" type="text/css" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">-->
   </head>
   <body>
-    <a id="chooseRed" class="btn btn-default">Red</button>
-    <button id="chooseOrange" type="button">Orange</button>
-    <button id="chooseYellow" type="button">Yellow</button>
-    <button id="chooseGreen" type="button">Green</button>
-    <button id="chooseBlue" type="button">Blue</button>
-    <button id="choosePurple" type="button">Purple</button>
-    <br />
-    <button id="chooseSmall" type="button">Small</button>
-    <button id="chooseNormal" type="button">Normal</button>
-    <button id="chooseLarge" type="button">Large</button>
-    <button id="chooseHuge" type="button">Huge</button>
-    <br />
-    <button id="chooseMarker" type="button">Marker</button>
-    <button id="chooseFill" type="button">Fill</button>
-    <button id="chooseEraser" type="button">Eraser</button>
-    <button id="clearCanvas" type="button">Clear</button>
-    <br />
-    <a href="#" id="saveImage" class="button" download="my_coloring_page">Download</a>
+    <div class="toolbox">
+      <div class="tools">
+        <a id="chooseMarker"><i class="icon ion-paintbrush fa-2x"></i></a>
+        <a id="chooseFill"><i class="icon ion-paintbucket fa-2x"></i></a>
+        <a id="chooseEraser"><i class="fa fa-eraser fa-2x" aria-hidden="true"></i></a>
+        <a id="clearCanvas"><i class="icon ion-loop fa-2x"></i></a>
+        <a id="saveImage" download="my_coloring_page"><i class="fa fa-floppy-o fa-2x"></i></a>
+      </div>
+      <div class="colors">
+        <a id="chooseRed"><i class="fa fa-circle fa-2x" style="color: red"></i></a>
+        <a id="chooseOrange"><i class="fa fa-circle fa-2x" style="color: orange"></i></a>
+        <a id="chooseYellow"><i class="fa fa-circle fa-2x" style="color: yellow"></i></a>
+        <a id="chooseGreen"><i class="fa fa-circle fa-2x" style="color: green"></i></a>
+        <a id="chooseBlue"><i class="fa fa-circle fa-2x" style="color: blue"></i></a>
+        <a id="choosePurple"><i class="fa fa-circle fa-2x" style="color: purple"></i></a>
+      </div>
+      <div class="size">
+        <a id="chooseSmall"><i class="fa fa-circle"></i></a>
+        <a id="chooseNormal"><i class="fa fa-circle fa-lg"></i></a>
+        <a id="chooseLarge"><i class="fa fa-circle fa-2x"></i></a>
+        <a id="chooseHuge"><i class="fa fa-circle fa-3x"></i></a>
+      </div>
+    </div>
     <div id="canvasDiv"></div>
   </body>
   <script
   src="https://code.jquery.com/jquery-3.1.1.min.js"
   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
   crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.1/socket.io.min.js"></script>
   <script type="text/javascript" src="js/canvas.js"></script>
 </html>

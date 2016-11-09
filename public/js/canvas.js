@@ -20,12 +20,15 @@ var colorPurple = { r: 128, g: 0, b: 128 };
 var colorWhite = { r: 255, g: 255, b: 255 };
 var clickColor = new Array();
 var curColor = colorPurple;
+$('#choosePurple').addClass("selected");
 
 var clickSize = new Array();
 var curSize = "normal";
+$('#chooseNormal').addClass("selected");
 
 var clickTool = new Array();
 var curTool = "marker";
+$('#chooseMarker').addClass("selected");
 
 var canvasDiv = document.getElementById('canvasDiv');
 var canvas = document.createElement('canvas');
@@ -153,52 +156,92 @@ $('#canvas').mouseleave(function(e) {
 });
 
 $('#chooseRed').mousedown(function(e) {
+  e.preventDefault();
   curColor = colorRed;
+  $('.colors').children().removeClass("selected");
+  $('#chooseRed').addClass("selected");
 });
 $('#chooseOrange').mousedown(function(e) {
+  e.preventDefault();
   curColor = colorOrange;
+  $('.colors').children().removeClass("selected");
+  $('#chooseOrange').addClass("selected");
 });
 $('#chooseYellow').mousedown(function(e) {
+  e.preventDefault();
   curColor = colorYellow;
+  $('.colors').children().removeClass("selected");
+  $('#chooseYellow').addClass("selected");
 });
 $('#chooseGreen').mousedown(function(e) {
+  e.preventDefault();
   curColor = colorGreen;
+  $('.colors').children().removeClass("selected");
+  $('#chooseGreen').addClass("selected");
 });
 $('#chooseBlue').mousedown(function(e) {
+  e.preventDefault();
   curColor = colorBlue;
+  $('.colors').children().removeClass("selected");
+  $('#chooseBlue').addClass("selected");
 });
 $('#choosePurple').mousedown(function(e) {
+  e.preventDefault();
   curColor = colorPurple;
+  $('.colors').children().removeClass("selected");
+  $('#choosePurple').addClass("selected");
 });
 
 $('#chooseSmall').mousedown(function(e) {
+  e.preventDefault();
   curSize = "small";
+  $('.size').children().removeClass("selected");
+  $('#chooseSmall').addClass("selected");
 });
 $('#chooseNormal').mousedown(function(e) {
+  e.preventDefault();
   curSize = "normal";
+  $('.size').children().removeClass("selected");
+  $('#chooseNormal').addClass("selected");
 });
 $('#chooseLarge').mousedown(function(e) {
+  e.preventDefault();
   curSize = "large";
+  $('.size').children().removeClass("selected");
+  $('#chooseLarge').addClass("selected");
 });
 $('#chooseHuge').mousedown(function(e) {
+  e.preventDefault();
   curSize = "huge";
+  $('.size').children().removeClass("selected");
+  $('#chooseHuge').addClass("selected");
 });
 
 $('#chooseMarker').mousedown(function(e) {
+  e.preventDefault();
 	curTool = "marker";
-	redraw();
+  $('.tools').children().removeClass("selected");
+  $('#chooseMarker').addClass("selected");
 });
 $('#chooseEraser').mousedown(function(e) {
+  e.preventDefault();
 	curTool = "eraser";
+  $('.tools').children().removeClass("selected");
+  $('#chooseEraser').addClass("selected");
 });
 $('#chooseFill').mousedown(function(e) {
+  e.preventDefault();
 	curTool = "bucket";
+  $('.tools').children().removeClass("selected");
+  $('#chooseFill').addClass("selected");
 });
 $('#clearCanvas').mousedown(function(e) {
+  e.preventDefault();
 	clearCanvas();
   socketEmitClear();
 });
 $('#saveImage').mousedown(function(e) {
+  e.preventDefault();
   var dataURL = canvas.toDataURL('image/png');
   this.href = dataURL;
 });
