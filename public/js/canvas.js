@@ -4,11 +4,11 @@ socket.on('connect', function() {
    socket.emit('room', url);
 });
 
-var outlineImageSrc = 'img/' + url + '.png';
+var outlineImageSrc = 'img' + url + '.png';
 
 // if no outlineImage, canvas will take this size
 var defaultWidth = 500;
-var defaultHeight = 300;
+var defaultHeight = 500;
 // outlineImage will be scaled down if larger than these dimensions
 var maxWidth = 800;
 var maxHeight = 500;
@@ -45,11 +45,25 @@ canvas.setAttribute('width', defaultWidth);
 canvas.setAttribute('height', defaultHeight);
 canvas.setAttribute('id', 'canvas');
 canvasDiv.appendChild(canvas);
-context = canvas.getContext("2d");
+var context = canvas.getContext("2d");
+
+$('#imageLoader').change(handleImage);
+
+function handleImage(e) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        outlineImageOriginal.src = e.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
+}
 
 // outlineImageTransparent takes outlineImageOriginal and makes the white areas transparent
 var outlineImageOriginal = new Image();
-outlineImageOriginal.src = outlineImageSrc;
+try {
+  outlineImageOriginal.src = outlineImageSrc;
+} catch (e) {
+  outlineImageOriginal.src = "";
+}
 var outlineImageTransparent = new Image();
 outlineImageOriginal.onload = function() {
   // resizes image if very large
@@ -86,6 +100,11 @@ function makeTransparent() {
       outlineLayerData.data[pixel + 1] = 255;
       outlineLayerData.data[pixel + 2] = 255;
       outlineLayerData.data[pixel + 3] = 0;
+    } else if (r + g + b < 400 && a > 100) {
+      outlineLayerData.data[pixel] = 30;
+      outlineLayerData.data[pixel + 1] = 30;
+      outlineLayerData.data[pixel + 2] = 30;
+      outlineLayerData.data[pixel + 3] = 255;
     }
   }
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js"
   },
-  "author": "",
+  "author": "jennhsu",
   "license": "MIT",
   "repository": {
     "type": "git",

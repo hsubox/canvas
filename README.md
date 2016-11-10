@@ -4,6 +4,7 @@ Users can collaboratively color online!
 - Includes red, orange, yellow, green, blue, and purple as colors
 - Includes 4 different size brushes
 - Includes paintbrush, paintfill, eraser, clear, and save functions
+- Includes file upload for custom coloring!
 
 Built using:
 - HTML5

@@ -6,7 +6,16 @@ var io = require('socket.io')(http);
 
 app.use('/js', express.static('public/js'));
 app.use('/css', express.static('public/css'));
-app.use('/img', express.static('public/img'));
+app.get('/img/:pattern', function(req, res) {
+  fs.readdir('public/img', function(err, files) {
+    if (files.includes(req.params.pattern)) {
+      res.sendFile(__dirname + '/public/img/' + req.params.pattern);
+    } else {
+      res.sendFile(__dirname + '/public/img/blank.png');
+    }
+  });
+});
+app.use('/custom', express.static('public/canvas-custom.html'))
 app.get('/:pattern', function(req, res) {
   res.sendFile(__dirname + '/public/canvas.html');
 });

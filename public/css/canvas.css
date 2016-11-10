@@ -1,3 +1,7 @@
+#imageLoader {
+    display: none;
+}
+
 #canvasDiv {
   display: flex;
   justify-content: center;
@@ -23,8 +27,31 @@
   padding-right: 25px;
 }
 
-.colors a, .size a, .tools a {
+.colors a, .size a, .tools a, .tools label {
   padding: 5px;
+}
+
+.size a, .size a:visited, .tools a, .tools a:visited {
+  color: black;
+}
+
+#chooseRed {
+  color: red;
+}
+#chooseOrange {
+  color: orange;
+}
+#chooseYellow {
+  color: yellow;
+}
+#chooseGreen {
+  color: green;
+}
+#chooseBlue {
+  color: blue;
+}
+#choosePurple {
+  color: purple;
 }
 
 .selected {
