@@ -15,7 +15,6 @@ app.get('/img/:pattern', function(req, res) {
     }
   });
 });
-app.use('/custom', express.static('public/canvas-custom.html'))
 app.get('/:pattern', function(req, res) {
   res.sendFile(__dirname + '/public/canvas.html');
 });

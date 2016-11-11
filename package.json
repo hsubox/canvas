@@ -1,7 +1,7 @@
 {
   "name": "canvas",
   "version": "1.0.0",
-  "description": "",
+  "description": "collaborative coloring",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"

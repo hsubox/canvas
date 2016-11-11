@@ -15,16 +15,23 @@
 .toolbox {
   display: flex;
   justify-content: space-around;
-  width: 850px;
+  width: 870px;
 }
 
 .colors, .size, .tools {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.size, .tools {
   width: 250px;
-  padding-left: 25px;
-  padding-right: 25px;
+}
+
+.colors {
+  width: 300px;
 }
 
 .colors a, .size a, .tools a, .tools label {
@@ -53,7 +60,14 @@
 #choosePurple {
   color: purple;
 }
+#chooseOtherColor {
+  color: black;
+}
 
 .selected {
   background-color: lightgrey;
+}
+
+.hide {
+  visibility: hidden;
 }
