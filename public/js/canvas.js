@@ -3,6 +3,7 @@ var url = window.location.pathname;
 socket.on('connect', function() {
    socket.emit('room', url);
 });
+var newUser = true;
 
 var outlineImageSrc = 'img' + url + '.png';
 
@@ -18,6 +19,7 @@ var clickY = new Array();
 var clickDrag = new Array();
 var paint;
 var outlineLayerData;
+var outlineLayerDataURL;
 var colorFillData;
 
 var colorRed = { r: 255, g: 0, b: 0 };
@@ -48,13 +50,15 @@ canvasDiv.appendChild(canvas);
 var context = canvas.getContext("2d");
 
 $('#imageLoader').change(handleImage);
+var imageChange = false;
 
 function handleImage(e) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        outlineImageOriginal.src = e.target.result;
-    }
-    reader.readAsDataURL(e.target.files[0]);
+  imageChange = true;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+      outlineImageOriginal.src = e.target.result;
+  }
+  reader.readAsDataURL(e.target.files[0]);
 }
 
 // outlineImageTransparent takes outlineImageOriginal and makes the white areas transparent
@@ -83,7 +87,15 @@ outlineImageOriginal.onload = function() {
   try {
     outlineLayerData = context.getImageData(0, 0, canvas.width, canvas.height);
     makeTransparent();
-    socketEmitImageRequest();
+    if (imageChange) {
+      clearCanvas();
+      imageChange = false;
+      socketEmitImageChange();
+    }
+    if (newUser) {
+      socketEmitImageRequest();
+      newUser = false;
+    }
 	} catch (ex) {
     console.error(ex);
   }
@@ -131,6 +143,7 @@ socket.on('clear', function() {
   clearCanvas();
 });
 socket.on('image', function(imageData) {
+  outlineImageOriginal.src = imageData.outlineLayerDataURL;
   var initialImage = new Image();
   initialImage.src = imageData.dataURL;
   initialImage.onload = function() {
@@ -170,8 +183,19 @@ function socketEmitClear() {
 }
 function socketEmitImage() {
   var dataURL = canvas.toDataURL();
+  outlineLayerDataURL = outlineImageOriginal.src;
   socket.emit('image', {
-    dataURL: dataURL
+    dataURL: dataURL,
+    outlineLayerDataURL: outlineLayerDataURL
+  });
+}
+function socketEmitImageChange() {
+  console.log('emitting image change');
+  var dataURL = canvas.toDataURL();
+  outlineLayerDataURL = outlineImageOriginal.src;
+  socket.emit('imageChange', {
+    dataURL: dataURL,
+    outlineLayerDataURL: outlineLayerDataURL
   });
 }
 function socketEmitImageRequest() {
@@ -221,36 +245,42 @@ $('#chooseRed').mousedown(function(e) {
   curColor = colorRed;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
+  fillWithCurColor();
 });
 $('#chooseOrange').mousedown(function(e) {
   e.preventDefault();
   curColor = colorOrange;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
+  fillWithCurColor();
 });
 $('#chooseYellow').mousedown(function(e) {
   e.preventDefault();
   curColor = colorYellow;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
+  fillWithCurColor();
 });
 $('#chooseGreen').mousedown(function(e) {
   e.preventDefault();
   curColor = colorGreen;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
+  fillWithCurColor();
 });
 $('#chooseBlue').mousedown(function(e) {
   e.preventDefault();
   curColor = colorBlue;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
+  fillWithCurColor();
 });
 $('#choosePurple').mousedown(function(e) {
   e.preventDefault();
   curColor = colorPurple;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
+  fillWithCurColor();
 });
 
 $('#chooseSmall').mousedown(function(e) {
@@ -303,7 +333,7 @@ $('#clearCanvas').mousedown(function(e) {
 });
 $('#saveImage').mousedown(function(e) {
   e.preventDefault();
-  var dataURL = canvas.toDataURL('image/png');
+  var dataURL = canvas.toDataURL();
   this.href = dataURL;
 });
 

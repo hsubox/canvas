@@ -55,6 +55,9 @@ io.on('connection', function(socket) {
       imageRequestedBy = null;
     }
   });
+  socket.on('imageChange', function(imageData) {
+    socket.broadcast.to(sockets_room).emit('image', imageData);
+  });
 })
 
 var port = 3000;
