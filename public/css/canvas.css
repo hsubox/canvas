@@ -63,3 +63,9 @@
 .hide {
   visibility: hidden;
 }
+
+footer {
+  text-align: right;
+  font-family: 'Raleway', sans-serif;
+  font-size: 10px;
+}
