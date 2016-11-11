@@ -8,6 +8,11 @@ app.use('/js', express.static('public/js'));
 app.use('/css', express.static('public/css'));
 app.get('/img/:pattern', function(req, res) {
   fs.readdir('public/img', function(err, files) {
+    if (err){
+      console.error(err);
+    }
+    console.log(files);
+    console.log(req.params)
     if (files.includes(req.params.pattern)) {
       res.sendFile(__dirname + '/public/img/' + req.params.pattern);
     } else {
