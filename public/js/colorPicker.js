@@ -34,9 +34,9 @@ function fillWithCurColor() {
 }
 
 $('#colorCanvas').click(function(e) {
-  var x = event.pageX - this.offsetLeft;
-  var y = event.pageY - this.offsetTop;
-  var pixel = colorContext.getImageData(x, y, 1, 1).data;
+  var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft;
+  var mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
+  var pixel = colorContext.getImageData(mouseX, mouseY, 1, 1).data;
   var r = pixel[0];
   var g = pixel[1];
   var b = pixel[2];

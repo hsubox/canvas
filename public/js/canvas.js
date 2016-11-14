@@ -202,10 +202,10 @@ function socketEmitImageRequest() {
   socket.emit('imageRequest');
 }
 
-// mouse events
-$('#canvas').mousedown(function(e) {
-  var mouseX = e.pageX - this.offsetLeft;
-  var mouseY = e.pageY - this.offsetTop;
+// mouse and touch event handling
+function press(e) {
+  var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft;
+  var mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
   if (curTool == "bucket") {
     paintAt(mouseX, mouseY, curColor);
     socketEmitFill(mouseX, mouseY);
@@ -214,68 +214,79 @@ $('#canvas').mousedown(function(e) {
     addClick(mouseX, mouseY, false);
     redraw();
   }
-});
-$('#canvas').mousemove(function(e) {
-  var mouseX = e.pageX - this.offsetLeft;
-  var mouseY = e.pageY - this.offsetTop;
+}
+canvas.addEventListener("mousedown", press, false);
+canvas.addEventListener("touchstart", press, false);
+
+function drag(e) {
+  var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft;
+  var mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
   if (curTool != "bucket" && paint) {
     addClick(mouseX, mouseY, true);
     redraw();
     socketEmitDraw();
   }
-});
-$('#canvas').mouseup(function(e) {
+}
+canvas.addEventListener("mousemove", drag, false);
+canvas.addEventListener("touchmove", drag, false);
+
+function release() {
   if (curTool != "bucket") {
     paint = false;
     redraw();
     socketEmitDraw();
     resetStrokes();
   }
-});
-$('#canvas').mouseleave(function(e) {
+}
+canvas.addEventListener("mouseup", release);
+canvas.addEventListener("touchend", release, false);
+
+function cancel() {
   if (curTool != "bucket") {
     paint = false;
     socketEmitDraw();
     resetStrokes();
   }
-});
+}
+canvas.addEventListener("mouseout", cancel, false);
+canvas.addEventListener("touchcancel", cancel, false);
 
-$('#chooseRed').mousedown(function(e) {
+$('#chooseRed').click(function(e) {
   e.preventDefault();
   curColor = colorRed;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
   fillWithCurColor();
 });
-$('#chooseOrange').mousedown(function(e) {
+$('#chooseOrange').click(function(e) {
   e.preventDefault();
   curColor = colorOrange;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
   fillWithCurColor();
 });
-$('#chooseYellow').mousedown(function(e) {
+$('#chooseYellow').click(function(e) {
   e.preventDefault();
   curColor = colorYellow;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
   fillWithCurColor();
 });
-$('#chooseGreen').mousedown(function(e) {
+$('#chooseGreen').click(function(e) {
   e.preventDefault();
   curColor = colorGreen;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
   fillWithCurColor();
 });
-$('#chooseBlue').mousedown(function(e) {
+$('#chooseBlue').click(function(e) {
   e.preventDefault();
   curColor = colorBlue;
   $('.colors').children().removeClass("selected");
   $(this).addClass("selected");
   fillWithCurColor();
 });
-$('#choosePurple').mousedown(function(e) {
+$('#choosePurple').click(function(e) {
   e.preventDefault();
   curColor = colorPurple;
   $('.colors').children().removeClass("selected");
@@ -283,55 +294,55 @@ $('#choosePurple').mousedown(function(e) {
   fillWithCurColor();
 });
 
-$('#chooseSmall').mousedown(function(e) {
+$('#chooseSmall').click(function(e) {
   e.preventDefault();
   curSize = "small";
   $('.size').children().removeClass("selected");
   $(this).addClass("selected");
 });
-$('#chooseNormal').mousedown(function(e) {
+$('#chooseNormal').click(function(e) {
   e.preventDefault();
   curSize = "normal";
   $('.size').children().removeClass("selected");
   $(this).addClass("selected");
 });
-$('#chooseLarge').mousedown(function(e) {
+$('#chooseLarge').click(function(e) {
   e.preventDefault();
   curSize = "large";
   $('.size').children().removeClass("selected");
   $(this).addClass("selected");
 });
-$('#chooseHuge').mousedown(function(e) {
+$('#chooseHuge').click(function(e) {
   e.preventDefault();
   curSize = "huge";
   $('.size').children().removeClass("selected");
   $(this).addClass("selected");
 });
 
-$('#chooseMarker').mousedown(function(e) {
+$('#chooseMarker').click(function(e) {
   e.preventDefault();
 	curTool = "marker";
   $('.tools').children().removeClass("selected");
   $(this).addClass("selected");
 });
-$('#chooseEraser').mousedown(function(e) {
+$('#chooseEraser').click(function(e) {
   e.preventDefault();
 	curTool = "eraser";
   $('.tools').children().removeClass("selected");
   $(this).addClass("selected");
 });
-$('#chooseFill').mousedown(function(e) {
+$('#chooseFill').click(function(e) {
   e.preventDefault();
 	curTool = "bucket";
   $('.tools').children().removeClass("selected");
   $(this).addClass("selected");
 });
-$('#clearCanvas').mousedown(function(e) {
+$('#clearCanvas').click(function(e) {
   e.preventDefault();
 	clearCanvas();
   socketEmitClear();
 });
-$('#saveImage').mousedown(function(e) {
+$('#saveImage').click(function(e) {
   e.preventDefault();
   var dataURL = canvas.toDataURL();
   this.href = dataURL;
