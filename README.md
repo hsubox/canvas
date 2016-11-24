@@ -11,7 +11,7 @@
   - Eraser
   - Clear canvas, and
   - Save
-  - Upload for custom images[]
+  - Upload for custom images
 - Includes red, orange, yellow, green, blue, and purple as well as custom colors
 - Users can join teammembers on any page
   - Default patterns (pattern1 - pattern10)
@@ -33,6 +33,16 @@
   - Jquery
   - Socket.io
   - Express/Node
+
+## Screenshots
+
+![](screenshots/pattern1_screenshot.png)
+
+![](screenshots/pattern8_screenshot.png)
+
+![](screenshots/pattern9.png)
+
+![](screenshots/pattern10.png)
 
 ## Notes:
 - Adapted from this [tutorial](http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/)
