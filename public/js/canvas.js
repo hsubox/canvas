@@ -14,32 +14,32 @@ var defaultHeight = 500;
 var maxWidth = 800;
 var maxHeight = 500;
 
-var clickX = new Array();
-var clickY = new Array();
-var clickDrag = new Array();
+var clickX = [];
+var clickY = [];
+var clickDrag = [];
 var paint;
 var outlineLayerData;
 var outlineLayerDataURL;
 var colorFillData;
 
-var colorRed = { r: 255, g: 0, b: 0 };
-var colorOrange = { r: 255, g: 165, b: 0 };
-var colorYellow =  { r: 255, g: 255, b: 0 };
-var colorGreen = { r: 0, g: 128, b: 0 };
-var colorBlue = { r: 0, g: 0, b: 255 };
-var colorPurple = { r: 128, g: 0, b: 128 };
-var colorWhite = { r: 255, g: 255, b: 255 };
-var clickColor = new Array();
+var colorRed = {r: 255, g: 0, b: 0};
+var colorOrange = {r: 255, g: 165, b: 0};
+var colorYellow = {r: 255, g: 255, b: 0};
+var colorGreen = {r: 0, g: 128, b: 0};
+var colorBlue = {r: 0, g: 0, b: 255};
+var colorPurple = {r: 128, g: 0, b: 128};
+var colorWhite = {r: 255, g: 255, b: 255};
+var clickColor = [];
 var curColor = colorPurple;
-$('#choosePurple').addClass("selected");
+$('#choosePurple').addClass('selected');
 
-var clickSize = new Array();
-var curSize = "normal";
-$('#chooseNormal').addClass("selected");
+var clickSize = [];
+var curSize = 'normal';
+$('#chooseNormal').addClass('selected');
 
-var clickTool = new Array();
-var curTool = "marker";
-$('#chooseMarker').addClass("selected");
+var clickTool = [];
+var curTool = 'marker';
+$('#chooseMarker').addClass('selected');
 
 var canvasDiv = document.getElementById('canvasDiv');
 var canvas = document.createElement('canvas');
@@ -47,7 +47,7 @@ canvas.setAttribute('width', defaultWidth);
 canvas.setAttribute('height', defaultHeight);
 canvas.setAttribute('id', 'canvas');
 canvasDiv.appendChild(canvas);
-var context = canvas.getContext("2d");
+var context = canvas.getContext('2d');
 
 $('#imageLoader').change(handleImage);
 var imageChange = false;
@@ -57,7 +57,7 @@ function handleImage(e) {
   var reader = new FileReader();
   reader.onload = function(e) {
       outlineImageOriginal.src = e.target.result;
-  }
+  };
   reader.readAsDataURL(e.target.files[0]);
 }
 
@@ -66,7 +66,7 @@ var outlineImageOriginal = new Image();
 try {
   outlineImageOriginal.src = outlineImageSrc;
 } catch (e) {
-  outlineImageOriginal.src = "";
+  outlineImageOriginal.src = '';
 }
 var outlineImageTransparent = new Image();
 outlineImageOriginal.onload = function() {
@@ -126,7 +126,7 @@ function makeTransparent() {
 }
 
 // socket updates
-socket.on('draw', function(drawData){
+socket.on('draw', function(drawData) {
   clickX = drawData.clickX;
   clickY = drawData.clickY;
   clickDrag = drawData.clickDrag;
@@ -152,7 +152,7 @@ socket.on('image', function(imageData) {
     context.drawImage(this, 0, 0);
     try {
       colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
-  	} catch (ex) {
+    } catch (ex) {
       console.error(ex);
     }
   };
@@ -168,14 +168,14 @@ function socketEmitDraw() {
     clickDrag: clickDrag,
     clickColor: clickColor,
     clickSize: clickSize,
-    clickTool: clickTool
+    clickTool: clickTool,
   });
 }
 function socketEmitFill(mouseX, mouseY) {
   socket.emit('fill', {
     mouseX: mouseX,
     mouseY: mouseY,
-    color: curColor
+    color: curColor,
   });
 }
 function socketEmitClear() {
@@ -186,7 +186,7 @@ function socketEmitImage() {
   outlineLayerDataURL = outlineImageOriginal.src;
   socket.emit('image', {
     dataURL: dataURL,
-    outlineLayerDataURL: outlineLayerDataURL
+    outlineLayerDataURL: outlineLayerDataURL,
   });
 }
 function socketEmitImageChange() {
@@ -195,7 +195,7 @@ function socketEmitImageChange() {
   outlineLayerDataURL = outlineImageOriginal.src;
   socket.emit('imageChange', {
     dataURL: dataURL,
-    outlineLayerDataURL: outlineLayerDataURL
+    outlineLayerDataURL: outlineLayerDataURL,
   });
 }
 function socketEmitImageRequest() {
@@ -206,7 +206,7 @@ function socketEmitImageRequest() {
 function press(e) {
   var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft;
   var mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
-  if (curTool == "bucket") {
+  if (curTool == 'bucket') {
     paintAt(mouseX, mouseY, curColor);
     socketEmitFill(mouseX, mouseY);
   } else {
@@ -215,127 +215,127 @@ function press(e) {
     redraw();
   }
 }
-canvas.addEventListener("mousedown", press, false);
-canvas.addEventListener("touchstart", press, false);
+canvas.addEventListener('mousedown', press, false);
+canvas.addEventListener('touchstart', press, false);
 
 function drag(e) {
   var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft;
   var mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
-  if (curTool != "bucket" && paint) {
+  if (curTool != 'bucket' && paint) {
     addClick(mouseX, mouseY, true);
     redraw();
     socketEmitDraw();
   }
 }
-canvas.addEventListener("mousemove", drag, false);
-canvas.addEventListener("touchmove", drag, false);
+canvas.addEventListener('mousemove', drag, false);
+canvas.addEventListener('touchmove', drag, false);
 
 function release() {
-  if (curTool != "bucket") {
+  if (curTool != 'bucket') {
     paint = false;
     redraw();
     socketEmitDraw();
     resetStrokes();
   }
 }
-canvas.addEventListener("mouseup", release);
-canvas.addEventListener("touchend", release, false);
+canvas.addEventListener('mouseup', release);
+canvas.addEventListener('touchend', release, false);
 
 function cancel() {
-  if (curTool != "bucket") {
+  if (curTool != 'bucket') {
     paint = false;
     socketEmitDraw();
     resetStrokes();
   }
 }
-canvas.addEventListener("mouseout", cancel, false);
-canvas.addEventListener("touchcancel", cancel, false);
+canvas.addEventListener('mouseout', cancel, false);
+canvas.addEventListener('touchcancel', cancel, false);
 
 $('#chooseRed').click(function(e) {
   e.preventDefault();
   curColor = colorRed;
-  $('.colors').children().removeClass("selected");
-  $(this).addClass("selected");
+  $('.colors').children().removeClass('selected');
+  $(this).addClass('selected');
   fillWithCurColor();
 });
 $('#chooseOrange').click(function(e) {
   e.preventDefault();
   curColor = colorOrange;
-  $('.colors').children().removeClass("selected");
-  $(this).addClass("selected");
+  $('.colors').children().removeClass('selected');
+  $(this).addClass('selected');
   fillWithCurColor();
 });
 $('#chooseYellow').click(function(e) {
   e.preventDefault();
   curColor = colorYellow;
-  $('.colors').children().removeClass("selected");
-  $(this).addClass("selected");
+  $('.colors').children().removeClass('selected');
+  $(this).addClass('selected');
   fillWithCurColor();
 });
 $('#chooseGreen').click(function(e) {
   e.preventDefault();
   curColor = colorGreen;
-  $('.colors').children().removeClass("selected");
-  $(this).addClass("selected");
+  $('.colors').children().removeClass('selected');
+  $(this).addClass('selected');
   fillWithCurColor();
 });
 $('#chooseBlue').click(function(e) {
   e.preventDefault();
   curColor = colorBlue;
-  $('.colors').children().removeClass("selected");
-  $(this).addClass("selected");
+  $('.colors').children().removeClass('selected');
+  $(this).addClass('selected');
   fillWithCurColor();
 });
 $('#choosePurple').click(function(e) {
   e.preventDefault();
   curColor = colorPurple;
-  $('.colors').children().removeClass("selected");
-  $(this).addClass("selected");
+  $('.colors').children().removeClass('selected');
+  $(this).addClass('selected');
   fillWithCurColor();
 });
 
 $('#chooseSmall').click(function(e) {
   e.preventDefault();
-  curSize = "small";
-  $('.size').children().removeClass("selected");
-  $(this).addClass("selected");
+  curSize = 'small';
+  $('.size').children().removeClass('selected');
+  $(this).addClass('selected');
 });
 $('#chooseNormal').click(function(e) {
   e.preventDefault();
-  curSize = "normal";
-  $('.size').children().removeClass("selected");
-  $(this).addClass("selected");
+  curSize = 'normal';
+  $('.size').children().removeClass('selected');
+  $(this).addClass('selected');
 });
 $('#chooseLarge').click(function(e) {
   e.preventDefault();
-  curSize = "large";
-  $('.size').children().removeClass("selected");
-  $(this).addClass("selected");
+  curSize = 'large';
+  $('.size').children().removeClass('selected');
+  $(this).addClass('selected');
 });
 $('#chooseHuge').click(function(e) {
   e.preventDefault();
-  curSize = "huge";
-  $('.size').children().removeClass("selected");
-  $(this).addClass("selected");
+  curSize = 'huge';
+  $('.size').children().removeClass('selected');
+  $(this).addClass('selected');
 });
 
 $('#chooseMarker').click(function(e) {
   e.preventDefault();
-	curTool = "marker";
-  $('.tools').children().removeClass("selected");
-  $(this).addClass("selected");
+	curTool = 'marker';
+  $('.tools').children().removeClass('selected');
+  $(this).addClass('selected');
 });
 $('#chooseEraser').click(function(e) {
   e.preventDefault();
-	curTool = "eraser";
-  $('.tools').children().removeClass("selected");
-  $(this).addClass("selected");
+	curTool = 'eraser';
+  $('.tools').children().removeClass('selected');
+  $(this).addClass('selected');
 });
 $('#chooseFill').click(function(e) {
   e.preventDefault();
-	curTool = "bucket";
-  $('.tools').children().removeClass("selected");
-  $(this).addClass("selected");
+	curTool = 'bucket';
+  $('.tools').children().removeClass('selected');
+  $(this).addClass('selected');
 });
 $('#clearCanvas').click(function(e) {
   e.preventDefault();
@@ -355,18 +355,18 @@ function clearCanvas() {
 }
 
 function resetStrokes() {
-  clickX = new Array();
-	clickY = new Array();
-	clickDrag = new Array();
-	clickColor = new Array();
-	clickSize = new Array();
+  clickX = [];
+	clickY = [];
+	clickDrag = [];
+	clickColor = [];
+	clickSize = [];
 }
 
 function addClick(x, y, dragging) {
   clickX.push(x);
   clickY.push(y);
   clickTool.push(curTool);
-  if (curTool == "eraser") {
+  if (curTool == 'eraser') {
     clickColor.push(colorWhite);
   } else {
     clickColor.push(curColor);
@@ -377,8 +377,8 @@ function addClick(x, y, dragging) {
 
 function redraw() {
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-  context.lineCap = "round";
-  context.lineJoin = "round";
+  context.lineCap = 'round';
+  context.lineJoin = 'round';
 
   if (colorFillData) {
     context.putImageData(colorFillData, 0, 0);
@@ -386,13 +386,13 @@ function redraw() {
 
   for (var i = 0; i < clickX.length; i++) {
     switch (clickSize[i]) {
-      case "small":
+      case 'small':
         radius = 2;
         break;
-      case "normal":
+      case 'normal':
         radius = 5;
         break;
-      case "large":
+      case 'large':
         radius = 10;
         break;
       default:
@@ -407,7 +407,7 @@ function redraw() {
     }
     context.lineTo(clickX[i], clickY[i]);
     context.closePath();
-    context.strokeStyle = "rgb(" + clickColor[i].r + ", " + clickColor[i].g + ", " + clickColor[i].b + ")";
+    context.strokeStyle = 'rgb(' + clickColor[i].r + ', ' + clickColor[i].g + ', ' + clickColor[i].b + ')';
     context.lineWidth = radius;
     context.stroke();
   }
@@ -420,8 +420,7 @@ function matchOutlineColor(r, g, b, a) {
   return (r + g + b < 100 && a > 50);
 }
 
-function matchStartColor (pixelPos, startR, startG, startB, color) {
-
+function matchStartColor(pixelPos, startR, startG, startB, color) {
   var r = outlineLayerData.data[pixelPos];
   var g = outlineLayerData.data[pixelPos + 1];
 	var b = outlineLayerData.data[pixelPos + 2];
@@ -429,7 +428,7 @@ function matchStartColor (pixelPos, startR, startG, startB, color) {
 
 	// If current pixel of the outline image is black
 	if (matchOutlineColor(r, g, b, a)) {
-	   return false;
+    return false;
 	}
 
 	r = colorFillData.data[pixelPos];
@@ -450,14 +449,14 @@ function matchStartColor (pixelPos, startR, startG, startB, color) {
 	return (Math.abs(r - startR) + Math.abs(g - startG) + Math.abs(b - startB) < 255);
 }
 
-function colorPixel (pixelPos, r, g, b, a) {
+function colorPixel(pixelPos, r, g, b, a) {
 	colorFillData.data[pixelPos] = r;
 	colorFillData.data[pixelPos + 1] = g;
 	colorFillData.data[pixelPos + 2] = b;
 	colorFillData.data[pixelPos + 3] = a !== undefined ? a : 255;
 }
 
-function floodFill (startX, startY, startR, startG, startB, color) {
+function floodFill(startX, startY, startR, startG, startB, color) {
   var newPos;
   var x;
   var y;
@@ -517,7 +516,7 @@ function floodFill (startX, startY, startR, startG, startB, color) {
 }
 
 // Start painting with paint bucket tool starting from pixel specified by startX and startY
-function paintAt (startX, startY, color) {
+function paintAt(startX, startY, color) {
   colorFillData = context.getImageData(0, 0, canvas.width, canvas.height);
 
 	var pixelPos = (startY * canvas.width + startX) * 4;

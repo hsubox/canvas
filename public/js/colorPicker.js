@@ -6,7 +6,7 @@ colorCanvas.setAttribute('width', colorWidth);
 colorCanvas.setAttribute('height', colorHeight);
 colorCanvas.setAttribute('id', 'colorCanvas');
 colorDiv.appendChild(colorCanvas);
-var colorContext = colorCanvas.getContext("2d");
+var colorContext = colorCanvas.getContext('2d');
 $('#colorDiv').addClass('hide');
 
 var gradient1 = colorContext.createLinearGradient(0, 0, colorCanvas.width, 0);
@@ -29,7 +29,7 @@ fillWithCurColor();
 
 function fillWithCurColor() {
   $('#chooseOtherColor').css({
-    color: "rgba(" + curColor.r + ", " + curColor.g + ", " + curColor.b + ", 255)"
+    color: 'rgba(' + curColor.r + ', ' + curColor.g + ', ' + curColor.b + ', 255)',
   });
 }
 
@@ -43,11 +43,11 @@ $('#colorCanvas').click(function(e) {
   curColor = {
     r: r,
     b: b,
-    g: g
+    g: g,
   };
   fillWithCurColor();
-  $('.colors').children().removeClass("selected");
-  $('#chooseOtherColor').addClass("selected");
+  $('.colors').children().removeClass('selected');
+  $('#chooseOtherColor').addClass('selected');
 });
 
 $('#chooseOtherColor').click( function(e) {
