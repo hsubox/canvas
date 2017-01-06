@@ -34,22 +34,22 @@ app.get('/', function(req, res) {
 var imageRequestedBy = false;
 
 io.on('connection', function(socket) {
-  var sockets_room = null;
+  var socketsRoom = null;
   socket.on('room', function(room) {
       socket.join(room);
-      sockets_room = room;
+      socketsRoom = room;
   });
   socket.on('draw', function(drawData) {
-    socket.broadcast.in(sockets_room).emit('draw', drawData);
+    socket.broadcast.in(socketsRoom).emit('draw', drawData);
   });
   socket.on('fill', function(fillData) {
-    socket.broadcast.in(sockets_room).emit('fill', fillData);
+    socket.broadcast.in(socketsRoom).emit('fill', fillData);
   });
   socket.on('clear', function() {
-    socket.broadcast.in(sockets_room).emit('clear');
+    socket.broadcast.in(socketsRoom).emit('clear');
   });
   socket.on('imageRequest', function() {
-    socket.broadcast.in(sockets_room).emit('imageRequest');
+    socket.broadcast.in(socketsRoom).emit('imageRequest');
     imageRequestedBy = socket.id;
   });
   socket.on('image', function(imageData) {
@@ -59,11 +59,11 @@ io.on('connection', function(socket) {
     }
   });
   socket.on('imageChange', function(imageData) {
-    socket.broadcast.to(sockets_room).emit('image', imageData);
+    socket.broadcast.to(socketsRoom).emit('image', imageData);
   });
-})
+});
 
 var port = process.env.PORT || 8080;
-http.listen(port, function(){
+http.listen(port, function() {
   console.log('listening on *:' + port);
 });
