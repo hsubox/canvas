@@ -69,3 +69,26 @@ footer {
   font-family: 'Raleway', sans-serif;
   font-size: 10px;
 }
+
+@media screen and (max-width: 870px) {
+
+  .toolbox {
+    flex-wrap: wrap;
+  }
+
+  .fa-1x {
+    font-size: 0.8em;
+  }
+
+  .fa-lg {
+    font-size: 1.0em;
+  }
+
+  .fa-2x {
+    font-size: 1.2em;
+  }
+
+  .fa-3x {
+    font-size: 1.4em;
+  }
+}

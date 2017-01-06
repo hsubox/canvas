@@ -1,4 +1,4 @@
-var colorWidth = 600;
+var colorWidth = Math.min(window.innerWidth, 600);
 var colorHeight = 30;
 var colorDiv = document.getElementById('colorDiv');
 var colorCanvas = document.createElement('canvas');

@@ -1,48 +1,51 @@
 <!doctype html>
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>
       HTML5 Drawing App
     </title>
-    <link rel="stylesheet" type="text/css" href="css/canvas.css">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/canvas.css">
   </head>
   <body>
-    <div class="toolboxDiv">
-      <div class="toolbox">
-        <div class="tools">
-          <a id="chooseMarker"><i class="icon ion-paintbrush fa-2x"></i></a>
-          <a id="chooseFill"><i class="icon ion-paintbucket fa-2x"></i></a>
-          <a id="chooseEraser"><i class="fa fa-eraser fa-2x" aria-hidden="true"></i></a>
-          <a id="clearCanvas"><i class="icon ion-loop fa-2x"></i></a>
-          <a id="saveImage" download="my_coloring_page"><i class="fa fa-floppy-o fa-2x"></i></a>
-          <label id="imageLoaderWrapper">
-            <i class="fa fa-upload fa-2x"></i>
-            <input type="file" id="imageLoader" name="imageLoader"/>
-          </label>
-        </div>
-        <div class="colors">
-          <a id="chooseRed"><i class="fa fa-circle fa-2x"></i></a>
-          <a id="chooseOrange"><i class="fa fa-circle fa-2x"></i></a>
-          <a id="chooseYellow"><i class="fa fa-circle fa-2x"></i></a>
-          <a id="chooseGreen"><i class="fa fa-circle fa-2x"></i></a>
-          <a id="chooseBlue"><i class="fa fa-circle fa-2x"></i></a>
-          <a id="choosePurple"><i class="fa fa-circle fa-2x"></i></a>
-          <a id="chooseOtherColor"><i class="fa fa-bullseye fa-2x"></i></a>
-        </div>
-        <div class="size">
-          <a id="chooseSmall"><i class="fa fa-circle"></i></a>
-          <a id="chooseNormal"><i class="fa fa-circle fa-lg"></i></a>
-          <a id="chooseLarge"><i class="fa fa-circle fa-2x"></i></a>
-          <a id="chooseHuge"><i class="fa fa-circle fa-3x"></i></a>
+    <div class="toolboxOuterDiv">
+      <div class="toolboxDiv">
+        <div class="toolbox">
+          <div class="tools">
+            <a id="chooseMarker"><i class="icon ion-paintbrush fa-2x"></i></a>
+            <a id="chooseFill"><i class="icon ion-paintbucket fa-2x"></i></a>
+            <a id="chooseEraser"><i class="fa fa-eraser fa-2x" aria-hidden="true"></i></a>
+            <a id="clearCanvas"><i class="icon ion-loop fa-2x"></i></a>
+            <a id="saveImage" download="my_coloring_page"><i class="fa fa-floppy-o fa-2x"></i></a>
+            <label id="imageLoaderWrapper">
+              <i class="fa fa-upload fa-2x"></i>
+              <input type="file" id="imageLoader" name="imageLoader"/>
+            </label>
+          </div>
+          <div class="colors">
+            <a id="chooseRed"><i class="fa fa-circle fa-2x"></i></a>
+            <a id="chooseOrange"><i class="fa fa-circle fa-2x"></i></a>
+            <a id="chooseYellow"><i class="fa fa-circle fa-2x"></i></a>
+            <a id="chooseGreen"><i class="fa fa-circle fa-2x"></i></a>
+            <a id="chooseBlue"><i class="fa fa-circle fa-2x"></i></a>
+            <a id="choosePurple"><i class="fa fa-circle fa-2x"></i></a>
+            <a id="chooseOtherColor"><i class="fa fa-bullseye fa-2x"></i></a>
+          </div>
+          <div class="size">
+            <a id="chooseSmall"><i class="fa fa-circle fa-1x"></i></a>
+            <a id="chooseNormal"><i class="fa fa-circle fa-lg"></i></a>
+            <a id="chooseLarge"><i class="fa fa-circle fa-2x"></i></a>
+            <a id="chooseHuge"><i class="fa fa-circle fa-3x"></i></a>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="toolboxDiv">
-      <div class="toolbox">
-        <div id="colorDiv"></div>
+      <div class="toolboxDiv">
+        <div class="toolbox">
+          <div id="colorDiv"></div>
+        </div>
       </div>
     </div>
     <div id="canvasDiv"></div>

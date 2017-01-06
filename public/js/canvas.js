@@ -11,8 +11,8 @@ var outlineImageSrc = 'img' + url + '.png';
 var defaultWidth = 500;
 var defaultHeight = 500;
 // outlineImage will be scaled down if larger than these dimensions
-var maxWidth = 800;
-var maxHeight = 500;
+var maxWidth = Math.min(window.innerWidth, 800);
+var maxHeight = Math.min(window.innerHeight - 150, 500);
 
 var clickX = [];
 var clickY = [];
